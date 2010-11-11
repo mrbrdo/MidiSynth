@@ -1,0 +1,8 @@
+﻿<Window x:Class="MidiSynth.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="800" Closed="Window_Closed" Loaded="Window_Loaded" xmlns:MidiSynth="clr-namespace:MidiSynth" Closing="Window_Closing">
+    <DockPanel Name="dockPanel1" LastChildFill="True">
+        <MidiSynth:BufferPlot x:Name="canvas1" />
+    </DockPanel>
+</Window>

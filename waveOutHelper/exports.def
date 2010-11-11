@@ -1,0 +1,5 @@
+LIBRARY WAVEOUTHELPER
+EXPORTS
+	OpenWaveDevice @1
+	CloseWaveDevice @2
+	WriteWaveBuffer @3

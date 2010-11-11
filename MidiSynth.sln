@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiSynth", "MidiSynth\MidiSynth.csproj", "{406A596E-E483-4CB6-950B-3D3B7F15619A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sanford.Multimedia.Midi", "CSharpMidiToolkitV5_demo\Sanford.Multimedia.Midi\Sanford.Multimedia.Midi.csproj", "{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "waveOutHelper", "waveOutHelper\waveOutHelper.vcxproj", "{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|Win32 = Debug|Win32
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|Win32 = Release|Win32
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Debug|Win32.ActiveCfg = Debug|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Debug|x86.ActiveCfg = Debug|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Debug|x86.Build.0 = Debug|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Release|Any CPU.ActiveCfg = Release|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Release|Mixed Platforms.Build.0 = Release|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Release|Win32.ActiveCfg = Release|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Release|x86.ActiveCfg = Release|x86
+		{406A596E-E483-4CB6-950B-3D3B7F15619A}.Release|x86.Build.0 = Release|x86
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Release|Win32.ActiveCfg = Release|Any CPU
+		{4269C72A-8D3A-4737-8F89-72EAA33EA9E1}.Release|x86.ActiveCfg = Release|Any CPU
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Debug|Win32.Build.0 = Debug|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Debug|x86.ActiveCfg = Debug|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Release|Any CPU.ActiveCfg = Release|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Release|Win32.ActiveCfg = Release|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Release|Win32.Build.0 = Release|Win32
+		{F7936DD0-9147-4F49-88A8-5DA27A75E8CB}.Release|x86.ActiveCfg = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

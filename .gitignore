@@ -1,0 +1,17 @@
+obj
+bin
+deploy
+deploy/*
+ipch
+ipch/*
+Debug
+Debug/*
+Release
+Release/*
+_ReSharper.*
+*.csproj.user
+*.resharper.user
+*.resharper
+*.suo
+*.cache
+~$*
