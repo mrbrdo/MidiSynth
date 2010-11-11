@@ -14,5 +14,6 @@ _ReSharper.*
 *.resharper
 *.suo
 *.sdf
+*.opensdf
 *.cache
 ~$*
