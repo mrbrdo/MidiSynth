@@ -5,6 +5,7 @@ using System.Text;
 using MidiSynth.ChainCommon;
 using MidiSynth.InputSources;
 using MidiSynth.ChainMembers;
+using MidiSynth.ChannelManagers;
 
 namespace MidiSynth
 {
@@ -25,9 +26,9 @@ namespace MidiSynth
             }
         }
 
-        public static void SetupClarinetWithEnvelope(out IAudioInputSource inputSource, out CC_Channel outChannel)
+        public static void SetupClarinetWithEnvelope(out NotePlayer.ChannelSetupDelegate chanSetup, out CC_Channel outChannel)
         {
-            inputSource = new IS_ScalePlayer(Info,
+            chanSetup =
                 (CC_Channel chan) =>
                 {
                     List<IAudioChainMember> is_chain = new List<IAudioChainMember>();
@@ -40,7 +41,7 @@ namespace MidiSynth
                     }));
                     is_chain.Add(new CM_ADSR_Envelope(chan, new float[] { 0.3f, 0, 0.3f }, 1, CM_ADSR_Envelope.ADSRLinearFunction));
                     chan.SetChain(is_chain);
-                }, 500);
+                };
 
             outChannel = new CC_Channel(Info);
             List<IAudioChainMember> chain = new List<IAudioChainMember>();
@@ -52,16 +53,16 @@ namespace MidiSynth
             outChannel.Activate();
         }
 
-        public static void SetupStringsWithoutEnvelope(out IAudioInputSource inputSource, out CC_Channel outChannel)
+        public static void SetupStringsWithoutEnvelope(out NotePlayer.ChannelSetupDelegate chanSetup, out CC_Channel outChannel)
         {
-            inputSource = new IS_ScalePlayer(Info,
+            chanSetup =
                 (CC_Channel chan) =>
                 {
                     List<IAudioChainMember> is_chain = new List<IAudioChainMember>();
                     is_chain.Add(new CM_KarplusStrong(chan));
                     is_chain.Add(new CM_ChannelTerminator(chan));
                     chan.SetChain(is_chain);
-                }, 500);
+                };
 
             outChannel = new CC_Channel(Info);
             List<IAudioChainMember> chain = new List<IAudioChainMember>();
@@ -73,9 +74,9 @@ namespace MidiSynth
             outChannel.Activate();
         }
 
-        public static void SetupSineWaveWithoutEnvelope(out IAudioInputSource inputSource, out CC_Channel outChannel)
+        public static void SetupSineWaveWithoutEnvelope(out NotePlayer.ChannelSetupDelegate chanSetup, out CC_Channel outChannel)
         {
-            inputSource = new IS_ScalePlayer(Info,
+            chanSetup =
                 (CC_Channel chan) =>
                 {
                     List<IAudioChainMember> is_chain = new List<IAudioChainMember>();
@@ -86,7 +87,7 @@ namespace MidiSynth
                     }));
                     is_chain.Add(new CM_ChannelTerminator(chan));
                     chan.SetChain(is_chain);
-                }, 500);
+                };
 
             outChannel = new CC_Channel(Info);
             List<IAudioChainMember> chain = new List<IAudioChainMember>();
@@ -100,9 +101,14 @@ namespace MidiSynth
 
         public static void Setup(out IAudioInputSource inputSource, out CC_Channel outChannel)
         {
-            SetupStringsWithoutEnvelope(out inputSource, out outChannel);
-            //SetupClarinetWithEnvelope(out inputSource, out outChannel);
-            //SetupSineWaveWithoutEnvelope(out inputSource, out outChannel);
+            NotePlayer.ChannelSetupDelegate chanSetup;
+
+            SetupStringsWithoutEnvelope(out chanSetup, out outChannel);
+            //SetupClarinetWithEnvelope(out chanSetup, out outChannel);
+            //SetupSineWaveWithoutEnvelope(out chanSetup, out outChannel);
+
+            //inputSource = new IS_MidiIn(Info, chanSetup);
+            inputSource = new IS_ScalePlayer(Info, chanSetup, 500);
         }
     }
 }
