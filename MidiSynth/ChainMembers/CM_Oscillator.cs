@@ -12,9 +12,10 @@ namespace MidiSynth.ChainMembers
         private int oscStep = 0;
 
         public delegate float OscillatorFunctionDelegate(float frequency, int step, int sampleRate);
-        public static OscillatorFunctionDelegate SineWave = (float frequency, int step, int sampleRate) =>
+        public static OscillatorFunctionDelegate SineWave = (float freq, int step, int sr) =>
         {
-            return 0;
+            double oi = 2 * Math.PI * freq * step / (double)sr;
+            return (float)(Math.Sin(oi));
         };
 
         private OscillatorFunctionDelegate funDelegate;
