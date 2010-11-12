@@ -82,13 +82,10 @@ h2. Example for a clarinet sound with an ADSR envelope
                     is_chain.Add(new CM_ADSR_Envelope(chan, new float[] { 0.3f, 0, 0.3f }, 1, CM_ADSR_Envelope.ADSRLinearFunction));
                     chan.SetChain(is_chain);
                 }, 500);
-
             outChannel = new CC_Channel(Info);
             List<IAudioChainMember> chain = new List<IAudioChainMember>();
-
             chain.Add(new CM_Normalizator(outChannel));
             chain.Add(new CM_BufferVisualizer(outChannel, 800));
-
             outChannel.SetChain(chain);
             outChannel.Activate();
         }
