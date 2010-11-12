@@ -86,14 +86,16 @@
     <Compile Include="ChainMembers\CM_Oscillator.cs" />
     <Compile Include="ChainCommon\IAudioChainMember.cs" />
     <Compile Include="ChannelManagers\NotePlayer.cs" />
+    <Compile Include="ConfSetup.cs" />
     <Compile Include="InputSources\IS_MidiIn.cs" />
+    <Compile Include="InputSources\IS_ScalePlayer.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioInOut.cs" />
+    <Compile Include="AudioInOut\AudioInOut.cs" />
     <Compile Include="PInvokeHelpers\WaveOut.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
