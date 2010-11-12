@@ -8,7 +8,12 @@ namespace MidiSynth.ChainMembers
 {
     class CM_KarplusStrong : AudioChainMember
     {
-        float K;
+        public float K
+        {
+            get;
+            set;
+        }
+
         float[] delay = null;
 
         public CM_KarplusStrong(CC_Channel c, float K = 1) : base(c)

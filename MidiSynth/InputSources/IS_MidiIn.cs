@@ -6,18 +6,30 @@ using Sanford.Multimedia.Midi;
 using MidiSynth.ChainCommon;
 using MidiSynth.ChainMembers;
 using MidiSynth.ChannelManagers;
+using System.Reflection;
+using System.Collections;
 
 namespace MidiSynth.InputSources
 {
+    class MidiControllerBinding
+    {
+        public int controllerId { get; set; }
+        public IAudioChainMember chainMember { get; set; }
+        public string propertyName { get; set; }
+    }
+
     class IS_MidiIn : IAudioInputSource
     {
         private InputDevice inDevice = null;
         private NotePlayer notePlayer;
         private Object messagesSyncLock = new Object();
+        private List<MidiControllerBinding> bindings = new List<MidiControllerBinding>();
+        private Object parametersChangingLock = new Object();
+        private Hashtable controllerCache = new Hashtable();
 
         public IS_MidiIn(CC_Info info, NotePlayer.ChannelSetupDelegate channelSetupDelegate)
         {
-            notePlayer = new NotePlayer(info, channelSetupDelegate);
+            notePlayer = new NotePlayer(info, channelSetupDelegate, this);
             if (InputDevice.DeviceCount == 0)
             {
                 throw new Exception("No MIDI input devices available.");
@@ -41,9 +53,23 @@ namespace MidiSynth.InputSources
             }
         }
 
+        public void BindPropertyToController(int controllerId, IAudioChainMember chainMember, string propertyName)
+        {
+            MidiControllerBinding b = new MidiControllerBinding { controllerId = controllerId, chainMember = chainMember, propertyName = propertyName };
+            bindings.Add(b);
+            // immediately set value if in cache
+            if (controllerCache.ContainsKey(controllerId))
+            {
+                SetBoundParameter(b, (int) (controllerCache[controllerId]));
+            }
+        }
+
         public float GetOutput()
         {
-            return notePlayer.GetOutput();
+            lock (parametersChangingLock)
+            {
+                return notePlayer.GetOutput();
+            }
         }
 
         // C0 - D#8
@@ -71,8 +97,30 @@ namespace MidiSynth.InputSources
                     case ChannelCommand.NoteOff:
                         notePlayer.TriggerNoteOff(MIDIKeyToFrequency(msg.Data1));
                         break;
+                    case ChannelCommand.Controller:
+                        controllerCache[msg.Data1] = msg.Data2;
+                        break;
+                }
+                lock (parametersChangingLock)
+                {
+                    foreach (MidiControllerBinding b in bindings)
+                    {
+                        if (b.controllerId == msg.Data1)
+                            SetBoundParameter(b, msg.Data2);
+                    }
                 }
             }
+        }
+
+        private void SetBoundParameter(MidiControllerBinding b, float value)
+        {
+            PropertyInfo pi = b.chainMember.GetType().GetProperty(b.propertyName);
+            pi.SetValue(b.chainMember, value, null);
+        }
+
+        private void SetBoundParameter(MidiControllerBinding b, int value)
+        {
+            SetBoundParameter(b, value / 127.0f);
         }
 
         private void HandleSysExMessageReceived(object sender, SysExMessageEventArgs e)

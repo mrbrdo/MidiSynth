@@ -22,7 +22,7 @@ namespace MidiSynth.InputSources
         public IS_ScalePlayer(CC_Info info, NotePlayer.ChannelSetupDelegate channelSetupDelegate, int playNoteForMs = 1000)
         {
             this.playNoteForMs = playNoteForMs;
-            notePlayer = new NotePlayer(info, channelSetupDelegate);
+            notePlayer = new NotePlayer(info, channelSetupDelegate, this);
             playThread = new Thread(new ThreadStart(PlayThread));
             playThread.Start();
         }

@@ -11,12 +11,15 @@ namespace MidiSynth.ChannelManagers
         private List<CC_Channel> channels = new List<CC_Channel>();
         private CC_Info Info;
         private CC_ChannelAdder cAdder;
+        private Object channelSetupCaller;
 
-        public delegate void ChannelSetupDelegate(CC_Channel channel);
+        public delegate void ChannelSetupDelegate(CC_Channel channel, Object calledBy);
         private ChannelSetupDelegate channelSetupDelegate;
 
-        public NotePlayer(CC_Info info, ChannelSetupDelegate channelSetupDelegate)
+        public NotePlayer(CC_Info info, ChannelSetupDelegate channelSetupDelegate, Object channelSetupCaller)
         {
+            this.channelSetupCaller = channelSetupCaller;
+            if (this.channelSetupCaller == null) this.channelSetupCaller = this;
             this.channelSetupDelegate = channelSetupDelegate;
             Info = info;
             cAdder = new CC_ChannelAdder(channels);
@@ -65,7 +68,7 @@ namespace MidiSynth.ChannelManagers
             CC_Channel chan = findChannel(freq); // if same note is re-pressed
             if (chan == null) chan = getFreeChannel(freq);
             chan.defaultInput = freq;
-            channelSetupDelegate(chan);
+            channelSetupDelegate(chan, channelSetupCaller);
             chan.Activate();
         }
 

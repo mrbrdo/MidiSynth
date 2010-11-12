@@ -29,7 +29,7 @@ namespace MidiSynth
         public static void SetupClarinetWithEnvelope(out NotePlayer.ChannelSetupDelegate chanSetup, out CC_Channel outChannel)
         {
             chanSetup =
-                (CC_Channel chan) =>
+                (CC_Channel chan, Object caller) =>
                 {
                     List<IAudioChainMember> is_chain = new List<IAudioChainMember>();
                     is_chain.Add(new CM_Oscillator(chan, (float freq, int step, int sr) =>
@@ -56,11 +56,18 @@ namespace MidiSynth
         public static void SetupStringsWithoutEnvelope(out NotePlayer.ChannelSetupDelegate chanSetup, out CC_Channel outChannel)
         {
             chanSetup =
-                (CC_Channel chan) =>
+                (CC_Channel chan, Object caller) =>
                 {
                     List<IAudioChainMember> is_chain = new List<IAudioChainMember>();
                     is_chain.Add(new CM_KarplusStrong(chan));
                     is_chain.Add(new CM_ChannelTerminator(chan));
+
+                    // midi only
+                    if (caller.GetType().Name == "IS_MidiIn")
+                    {
+                        IS_MidiIn mi = (IS_MidiIn)caller;
+                        mi.BindPropertyToController(0x7, is_chain[0], "K");
+                    }
                     chan.SetChain(is_chain);
                 };
 
@@ -77,7 +84,7 @@ namespace MidiSynth
         public static void SetupSineWaveWithoutEnvelope(out NotePlayer.ChannelSetupDelegate chanSetup, out CC_Channel outChannel)
         {
             chanSetup =
-                (CC_Channel chan) =>
+                (CC_Channel chan, Object caller) =>
                 {
                     List<IAudioChainMember> is_chain = new List<IAudioChainMember>();
                     is_chain.Add(new CM_Oscillator(chan, (float freq, int step, int sr) =>
