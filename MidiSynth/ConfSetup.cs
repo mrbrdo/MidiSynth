@@ -54,14 +54,14 @@ namespace MidiSynth
             outChannel.Activate();
         }
 
-        public static void SetupStringsWithEnvelope(out IAudioInputSource inputSource, out CC_Channel outChannel)
+        public static void SetupStringsWithoutEnvelope(out IAudioInputSource inputSource, out CC_Channel outChannel)
         {
             inputSource = new IS_ScalePlayer(Info,
                 (CC_Channel chan) =>
                 {
                     List<IAudioChainMember> is_chain = new List<IAudioChainMember>();
                     is_chain.Add(new CM_KarplusStrong(chan));
-                    is_chain.Add(new CM_ADSR_Envelope(chan, new float[] { 0.3f, 0, 0.3f }, 1, CM_ADSR_Envelope.ADSRLinearFunction));
+                    is_chain.Add(new CM_ChannelTerminator(chan));
                     chan.SetChain(is_chain);
                 }, 500);
 
@@ -102,8 +102,9 @@ namespace MidiSynth
 
         public static void Setup(out IAudioInputSource inputSource, out CC_Channel outChannel)
         {
+            SetupStringsWithoutEnvelope(out inputSource, out outChannel);
             //SetupClarinetWithEnvelope(out inputSource, out outChannel);
-            SetupSineWaveWithoutEnvelope(out inputSource, out outChannel);
+            //SetupSineWaveWithoutEnvelope(out inputSource, out outChannel);
         }
     }
 }
