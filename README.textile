@@ -1,6 +1,10 @@
 h1. General info
 
-Written in C#.NET (.NET 4.0) using WPF.
+Written in C#.NET (.NET 4.0) using WPF in Visual Studio 2010. Use git (google for msysgit on Windows) to clone this repository. Command line:
+
+bq. git clone git://github.com/mrbrdo/MidiSynth.git
+
+Then open the solution (.sln file) in Visual Studio.
 
 h1. How it works
 
