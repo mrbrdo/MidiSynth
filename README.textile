@@ -19,6 +19,7 @@ h3. Example: IS_ScalePlayer
             CC_Info info = new CC_Info;
             info.SampleRate = 8000;
             info.BufferSize = 400;
+
             new IS_ScalePlayer(Info,
                 (CC_Channel chan) =>
                 {
@@ -34,15 +35,19 @@ h3. Example: IS_ScalePlayer
 </code>
 </pre>
 
-The IS_ScalePlayer accepts a lambda to set up the channels it uses for playing each note. In this case we add a sine wave oscillator and a terminator (read about terminators below).
+The IS_ScalePlayer accepts a lambda function which will be used to set up the channels it uses for playing each note. This is important if we want to perform some processing on each seperate note being played (for example adding an envelope). In this case we add a sine wave oscillator and a terminator (read about terminators below).
 
 h2. Channel
 
 A channel is just a container class which contains one or more chain members (IAudioChainMember). When requesting output from a channel, it will pass its input into the first chain member, the output of that into the second chain member, etc. and return the output of the last chain member.
 
-h2. Chain Members (IAudioChainMember)
+h2. Chain members (IAudioChainMember)
 
 A chain member is simply a class which takes an input and generates an output. Some classes that are implemented as chain members: CM_Oscillator, CM_Normalizator, CM_ADSR_Envelope, CM_ChannelTerminator.
+
+h2. Chain members and number of samples
+
+A chain member's input is just the current input sample. If the chain member needs to access past samples or past outputs, it must create a buffer to store them.
 
 h2. Channel terminators
 
