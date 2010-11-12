@@ -38,8 +38,6 @@ namespace MidiSynth
                             0.581 * Math.Cos(5 * oi) + 0.382 * Math.Cos(7 * oi) +
                             0.141 * Math.Cos(9 * oi) + 0.028 * Math.Cos(11 * oi) + 0.009 * Math.Cos(13 * oi));
                     }));
-                    /*is_chain.Add(new CM_KarplusStrong(chan));*/
-                    //is_chain.Add(new CM_ChannelTerminator(chan));
                     is_chain.Add(new CM_ADSR_Envelope(chan, new float[] { 0.3f, 0, 0.3f }, 1, CM_ADSR_Envelope.ADSRLinearFunction));
                     chan.SetChain(is_chain);
                 }, 500);
