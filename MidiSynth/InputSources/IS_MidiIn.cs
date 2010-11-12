@@ -13,9 +13,6 @@ namespace MidiSynth.InputSources
     {
         private InputDevice inDevice = null;
         private NotePlayer notePlayer;
-        private List<CC_Channel> channels = new List<CC_Channel>();
-        private CC_Info Info;
-        private CC_ChannelAdder cAdder;
         private Object messagesSyncLock = new Object();
 
         public IS_MidiIn(CC_Info info, NotePlayer.ChannelSetupDelegate channelSetupDelegate)
