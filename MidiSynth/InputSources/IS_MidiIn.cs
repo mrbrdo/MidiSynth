@@ -5,34 +5,28 @@ using System.Text;
 using Sanford.Multimedia.Midi;
 using MidiSynth.ChainCommon;
 using MidiSynth.ChainMembers;
+using MidiSynth.ChannelManagers;
 
 namespace MidiSynth.InputSources
 {
     class IS_MidiIn : IAudioInputSource
     {
         private InputDevice inDevice = null;
+        private NotePlayer notePlayer;
         private List<CC_Channel> channels = new List<CC_Channel>();
         private CC_Info Info;
         private CC_ChannelAdder cAdder;
         private Object messagesSyncLock = new Object();
 
-        public delegate void ChannelSetupDelegate(CC_Channel channel);
-        private ChannelSetupDelegate channelSetupDelegate;
-
-        public IS_MidiIn(CC_Info info, ChannelSetupDelegate channelSetupDelegate)
+        public IS_MidiIn(CC_Info info, NotePlayer.ChannelSetupDelegate channelSetupDelegate)
         {
-            this.channelSetupDelegate = channelSetupDelegate;
+            notePlayer = new NotePlayer(info, channelSetupDelegate);
             if (InputDevice.DeviceCount == 0)
             {
                 throw new Exception("No MIDI input devices available.");
             }
             else
             {
-                Info = info;
-                cAdder = new CC_ChannelAdder(channels);
-                // Initialize a few channels before-hand
-                for (int i = 0; i < 8; i++)
-                    channels.Add(new CC_Channel(Info));
                 try
                 {
                     inDevice = new InputDevice(0);
@@ -50,39 +44,9 @@ namespace MidiSynth.InputSources
             }
         }
 
-        private CC_Channel getFreeChannel(Object newTag)
-        {
-            CC_Channel result = null;
-            foreach (CC_Channel chan in channels)
-            {
-                if (chan.tag == null)
-                {
-                    result = chan;
-                    break;
-                }
-            }
-            if (result == null)
-            {
-                result = new CC_Channel(Info);
-                channels.Add(result);
-            }
-            result.tag = newTag;
-            return result;
-        }
-
-        private CC_Channel findChannel(Object tag)
-        {
-            foreach (CC_Channel chan in channels)
-            {
-                if (chan.tag != null && chan.tag.Equals(tag))
-                    return chan;
-            }
-            return null;
-        }
-
         public float GetOutput()
         {
-            return cAdder.GetOutput();
+            return notePlayer.GetOutput();
         }
 
         // C0 - D#8
@@ -105,16 +69,10 @@ namespace MidiSynth.InputSources
                 switch (msg.Command)
                 {
                     case ChannelCommand.NoteOn:
-                        CC_Channel chan = findChannel(msg.Data1); // if same note is re-pressed
-                        if (chan == null) chan = getFreeChannel(msg.Data1);
-                        chan.defaultInput = MIDIKeyToFrequency(msg.Data1);
-                        channelSetupDelegate(chan);
-                        chan.Activate();
+                        notePlayer.TriggerNoteOn(MIDIKeyToFrequency(msg.Data1));
                         break;
                     case ChannelCommand.NoteOff:
-                        CC_Channel c = findChannel(msg.Data1);
-                        if (c != null)
-                            c.InputEnded = true;
+                        notePlayer.TriggerNoteOff(MIDIKeyToFrequency(msg.Data1));
                         break;
                 }
             }
