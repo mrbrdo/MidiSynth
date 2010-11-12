@@ -35,15 +35,16 @@ namespace MidiSynth.InputSources
         public void PlayThread()
         {
             bool cont = true;
+            int startKey = 3 * 12;
             float[] freqsToPlay = new float[] {
-                MidiKeyFrequencies[48],
-                MidiKeyFrequencies[50],
-                MidiKeyFrequencies[52],
-                MidiKeyFrequencies[53],
-                MidiKeyFrequencies[55],
-                MidiKeyFrequencies[57],
-                MidiKeyFrequencies[59],
-                MidiKeyFrequencies[60]
+                MidiKeyFrequencies[startKey + 0],
+                MidiKeyFrequencies[startKey + 2],
+                MidiKeyFrequencies[startKey + 4],
+                MidiKeyFrequencies[startKey + 5],
+                MidiKeyFrequencies[startKey + 7],
+                MidiKeyFrequencies[startKey + 9],
+                MidiKeyFrequencies[startKey + 11],
+                MidiKeyFrequencies[startKey + 12]
             };
             while (cont)
             {
