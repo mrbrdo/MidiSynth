@@ -96,7 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioInOut\AudioInOut.cs" />
-    <Compile Include="PInvokeHelpers\WaveOut.cs" />
+    <Compile Include="PInvokeHelpers\Wave.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

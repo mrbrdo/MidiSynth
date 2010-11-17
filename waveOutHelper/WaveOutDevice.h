@@ -17,7 +17,7 @@ private:
 	
 	int getNextBuffer(int i);
 public:
-	WaveOutDevice(int sampleRate, int bufferSize, LPCSTR lpSyncName);
+	WaveOutDevice(int sampleRate, int nChannels, int bitsPerSample, int bufferSize, LPCSTR lpSyncName);
 	void BufferDone(LPWAVEHDR header);
 	void EnqueueWriteBuffer();
 	void Write(LPCSTR data, int szData);

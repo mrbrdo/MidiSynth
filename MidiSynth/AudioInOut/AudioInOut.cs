@@ -17,7 +17,7 @@ namespace MidiSynth
         private CC_Info info;
         private IAudioInputSource inputSource;
         private CC_Channel processingChannel;
-        private WaveOut.WaveOutDevice player;
+        private Wave.WaveOutDevice player;
         public int sampleLengthMs;
         private bool threadContinue = true;
         private Object threadContinueSync = new Object();
@@ -31,7 +31,7 @@ namespace MidiSynth
 
             sampleLengthMs = (int)(info.BufferSize / (double)info.SampleRate * 1000);
 
-            player = new WaveOut.WaveOutDevice(info.SampleRate, info.BufferSize);
+            player = new Wave.WaveOutDevice(info.SampleRate, 8, info.BufferSize);
             player.Open();
         }
 

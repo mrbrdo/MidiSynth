@@ -5,7 +5,7 @@ std::vector<WaveOutDevice *> devices;
 
 WaveOutDevice *getDeviceById(DWORD id)
 {
-	for (int i=0; i<devices.size(); i++)
+	for (int i=0; i<(int)devices.size(); i++)
 	{
 		if (devices[i]->Identifier() == id)
 		{
@@ -30,7 +30,7 @@ void CALLBACK waveOutProc(
 	}
 }
 
-WaveOutDevice::WaveOutDevice(int sampleRate, int bufferSize, LPCSTR lpSyncName)
+WaveOutDevice::WaveOutDevice(int sampleRate, int nChannels, int bitsPerSample, int bufferSize, LPCSTR lpSyncName)
 {
 	destroying = false;
     WAVEFORMATEX  format;
@@ -38,8 +38,8 @@ WaveOutDevice::WaveOutDevice(int sampleRate, int bufferSize, LPCSTR lpSyncName)
     // Open a waveform device for output using window callback. 
 
 	format.wFormatTag = WAVE_FORMAT_PCM;
-	format.nChannels = 1;
-	format.wBitsPerSample = 8;
+	format.nChannels = nChannels;
+	format.wBitsPerSample = bitsPerSample;
 	// common values for nSamplesPerSec are 8.0 kHz, 11.025 kHz, 22.05 kHz, and 44.1 kHz (in Hertz)
 	format.nSamplesPerSec = sampleRate;
 	

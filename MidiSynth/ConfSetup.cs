@@ -110,12 +110,12 @@ namespace MidiSynth
         {
             NotePlayer.ChannelSetupDelegate chanSetup;
 
-            SetupStringsWithoutEnvelope(out chanSetup, out outChannel);
+            //SetupStringsWithoutEnvelope(out chanSetup, out outChannel);
             //SetupClarinetWithEnvelope(out chanSetup, out outChannel);
-            //SetupSineWaveWithoutEnvelope(out chanSetup, out outChannel);
+            SetupSineWaveWithoutEnvelope(out chanSetup, out outChannel);
 
             //inputSource = new IS_MidiIn(Info, chanSetup);
-            inputSource = new IS_ScalePlayer(Info, chanSetup, 500);
+            inputSource = new IS_ScalePlayer(Info, chanSetup, 1000);
         }
     }
 }

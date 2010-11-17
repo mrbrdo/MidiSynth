@@ -6,16 +6,16 @@
 
 // Functions are dll exported through the .def file
 
-DWORD __stdcall OpenWaveDevice(int sampleRate, int bufferSize, LPCSTR lpSyncName)
+DWORD __stdcall OpenWaveDevice(int sampleRate, int nChannels, int bitsPerSample, int bufferSize, LPCSTR lpSyncName)
 {
-	WaveOutDevice *dev = new WaveOutDevice(sampleRate, bufferSize, lpSyncName);
+	WaveOutDevice *dev = new WaveOutDevice(sampleRate, nChannels, bitsPerSample, bufferSize, lpSyncName);
 	devices.push_back(dev);
 	return dev->Identifier();
 }
 
 void __stdcall CloseWaveDevice(DWORD deviceId)
 {
-	for (int i=0; i<devices.size(); i++)
+	for (int i=0; i<(int)devices.size(); i++)
 	{
 		if (devices[i]->Identifier() == deviceId)
 		{
