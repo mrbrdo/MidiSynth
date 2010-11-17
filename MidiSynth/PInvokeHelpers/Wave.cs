@@ -105,10 +105,10 @@ using System.Text;
             public WaveOutDevice(int sampleRate, int bitsPerSample, int bufferSize)
             {
                 this.sampleRate = sampleRate;
-                this.bufferSize = bufferSize * bitsPerSample;
                 this.nChannels = 1;
                 this.bitsPerSample = bitsPerSample;
-                this.bytesPerSample = (int) Math.Ceiling(bitsPerSample / 8.0);
+                this.bytesPerSample = (int)Math.Ceiling(bitsPerSample / 8.0);
+                this.bufferSize = bufferSize * bytesPerSample;
                 this.syncName += "_" + this.GetHashCode().ToString();
             }
 
