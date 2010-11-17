@@ -11,7 +11,7 @@ namespace MidiSynth.ChainMembers
     {
         private DateTime lastUpdated = DateTime.Now;
         private float[] buffer;
-        private float updateInterval = 0.1f;
+        private float updateInterval = 0.2f;
 
         public CM_BufferVisualizer(CC_Channel c, int nSamplesToVisualize) : base(c) {
             buffer = new float[nSamplesToVisualize];
