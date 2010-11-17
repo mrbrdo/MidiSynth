@@ -31,7 +31,7 @@ namespace MidiSynth
 
             sampleLengthMs = (int)(info.BufferSize / (double)info.SampleRate * 1000);
 
-            player = new Wave.WaveOutDevice(info.SampleRate, 8, info.BufferSize);
+            player = new Wave.WaveOutDevice(info.SampleRate, 16, info.BufferSize);
             player.Open();
         }
 
