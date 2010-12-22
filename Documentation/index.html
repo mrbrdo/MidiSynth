@@ -5,9 +5,37 @@
     <title>Index</title>
 
     <link rel="stylesheet" href="assets/style.css" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript" language="javascript" charset="utf-8" src="assets/jquery.js"></script>
+    <script type="text/javascript" language="javascript" charset="utf-8" src="assets/main.js"></script>
   </head>
 
   <body>
+  <h1>MIDI Synth</h1>
+  Click a heading to show detailed information.
+  
+  <h2 class="doc">Project Structure</h2>
+  <div class="doc">
+    <img src="assets/project-structure.png">
+  </div>
+  
+  <h2 class="doc">Basic Operation</h2>
+  <div class="doc">
+    <p>
+    Observe the following diagram of the basic operation of the application.
+    </p>
+    <img src="assets/basic-operation.png">
+    <p>
+      For example:
+      <ul>
+        <li>The IS_MidiIn Input Source converts MIDI commands into note frequencies and calls TriggerNoteOn/TriggerNoteOff on the NotePlayer Channel Manager.</li>
+        <li>The NotePlayer Channel Manager creates a channel for each frequency being played at the time.</li>
+        <li>Each Channel has its seperate Processing Chain containing Chain Members such as CM_Oscillator, CM_ADSR_Envelope etc.</li>
+        <li>After the each channel finishes processing, the channels are added together (simple sum operation) via the Channel Adder.</li>
+        <li>The resulting single output channel again has its own Processing Chain, usually containing Chain Members such as CM_Normalizator and CM_BufferVisualizer.</li>
+        <li>The normalized buffer in the output channel is played through the speakers via the AudioInOut class, which in turn uses WaveOutDevice to send the buffer to be played to the operating system.</li>
+      </ul>
+    </p>
+  </div>
 
   </body>
 </html>
