@@ -81,6 +81,7 @@
     <Compile Include="ChainMembers\CM_ADSR_Envelope.cs" />
     <Compile Include="ChainMembers\CM_BufferVisualizer.cs" />
     <Compile Include="ChainMembers\CM_ChannelTerminator.cs" />
+    <Compile Include="ChainMembers\CM_Convol.cs" />
     <Compile Include="ChainMembers\CM_KarplusStrong.cs" />
     <Compile Include="ChainMembers\CM_Normalizator.cs" />
     <Compile Include="ChainMembers\CM_Oscillator.cs" />
