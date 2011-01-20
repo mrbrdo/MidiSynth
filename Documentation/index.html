@@ -11,7 +11,16 @@
 
   <body>
   <h1>MIDI Synth</h1>
-  Click a heading to show detailed information.
+  <p>
+    MIDI Synth is a program written in C#.NET. The program implements some basic digital signal processing techniques to generate and modify audio. Initially, the program only supported input via a MIDI device (hence the name), but later, support for reading a WAVE file as the input was added as well. The input can then be modified by using different filters, such as convolution based filters, filter envelopes, etc. The program is written in a modular structure, with the intent of being easily extensible. At the end, the resulting audio resides in the output channel, which can be played back through the speakers.
+  </p>
+  <p>
+    This program is intended for the processing of sound signals in real time (so, for example, some more complex convolution filters are not appropriate if they are computationally too expensive), however it would be possible to add a different output source (such as a WAVE file writer), making the program suitable for slower than real-time processing of audio files as well.
+  </p>
+
+  <p>
+    Click a heading to show detailed information.
+  </p>
   
   <h2 class="doc">Project Structure</h2>
   <div class="doc">
@@ -30,12 +39,85 @@
         <li>The IS_MidiIn Input Source converts MIDI commands into note frequencies and calls TriggerNoteOn/TriggerNoteOff on the NotePlayer Channel Manager.</li>
         <li>The NotePlayer Channel Manager creates a channel for each frequency being played at the time.</li>
         <li>Each Channel has its seperate Processing Chain containing Chain Members such as CM_Oscillator, CM_ADSR_Envelope etc.</li>
-        <li>After the each channel finishes processing, the channels are added together (simple sum operation) via the Channel Adder.</li>
+        <li>After each channel finishes processing, the channels are added together (simple sum operation) via the Channel Adder.</li>
         <li>The resulting single output channel again has its own Processing Chain, usually containing Chain Members such as CM_Normalizator and CM_BufferVisualizer.</li>
         <li>The normalized buffer in the output channel is played through the speakers via the AudioInOut class, which in turn uses WaveOutDevice to send the buffer to be played to the operating system.</li>
       </ul>
     </p>
   </div>
+  
+  <h2 class="doc">Input Source</h2>
+  <div class="doc">
+    <p>
 
+    </p>
+  </div>
+  
+  <h2 class="doc">Channel</h2>
+  <div class="doc">
+    <p>
+
+    </p>
+  </div>
+  
+  <h2 class="doc">Channel Manager</h2>
+  <div class="doc">
+    <p>
+
+    </p>
+  </div>
+  
+  <h2 class="doc">Processing Chain / Chain Members</h2>
+  <div class="doc">
+    <p>
+
+    </p>
+  </div>
+  
+  <h2 class="doc">Channel Adder</h2>
+  <div class="doc">
+    <p>
+
+    </p>
+  </div>
+  
+  <h2 class="doc">Audio Output</h2>
+  <div class="doc">
+    <p>
+
+    </p>
+  </div>
+  
+  <h2 class="doc">Notes about the waveOutHelper C++ subproject</h2>
+  <div class="doc">
+    <p>
+      The purpose of the waveOutHelper subproject, a DLL written in C++, is to provide real-time audio playback functionality to the .NET application. The support for this functionality is absent or very limited in .NET, hence the need for this subproject. To implement this efficiently, the best choice is to use Win32API, which is tedious to do in .NET managed code, therefore the need for this DLL.
+    </p>
+
+    <p>
+      WaveOutDevice.cpp creates a class abstracting the low-level multimedia Windows API. Most of the work here is in managing 2 or more audio buffers, which are constantly being exchanged by the operating system (i.e. double-buffering), to achieve seamless real-time audio playback without glitches like crackling sounds. A named semaphore is used to signal the main application that a buffer is ready to be written (.NET already supports semaphores so using a semaphore is an obvious choice).
+    </p>
+
+    <p>
+      Because exporting C++ classes from DLLs is not as compatible with all applications as exporting simple functions, waveOutHelper.cpp defines just a few functions which manage the class created in WaveOutDevice.cpp. These "helper" functions are then called by the .NET applications (using .NET PInvoke Interop.) to achieve real-time sound playback. By introducing a "handles" (named deviceId in the code) concept, the DLL is able to create multiple output devices if necessary (just call OpenWaveDevice multiple times to obtain multiple output devices).
+    </p>
+  </div>
+  
+  <h2 class="doc">Ideas for Further Work</h2>
+  <div class="doc">
+    <ul>
+      <li>Adding visual components for chain members and other parts of the project, to allow simple visual construction of audio processing chains, similar to how the program <a href="http://puredata.info/" target="_blank">PureData</a> works. <a href="http://www.propellerheads.se/products/reason/" target="_blank">Propellerheads Reason</a> can also serve as an inspiration here (actually, the structure of the project was inspired by this program).</li>
+      <li>Describing the structure of input sources, channels and chain members via a descriptive language (instead of programatically in a programming language) such as XML or XAML. This would also make it easy to load/save structures created by the "visual editor" mentioned above.</li>
+      <li>Refactoring the code to make it even more modular, simpler and extensible.</li>
+      <li>Add a WAVE file output option to enable non real-time processing of audio files (e.g. for testing complex, slow filters).</li>
+    </ul>
+  </div>
+  
+  <h2 class="doc">Credit</h2>
+  <div class="doc">
+    <p>
+      The original project was written by Jan Berdajs (email: mrbrdo@gmail.com), student at Faculty of Computer and Information Science, University in Ljubljana, in the year 2011, under the mentorship of prof. Kodek and dr. Rozman.
+    </p>
+  </div>
   </body>
 </html>
