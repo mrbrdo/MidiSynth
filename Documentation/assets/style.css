@@ -2,3 +2,12 @@ h2 {
   border-bottom: 1px dotted black;
   color: #555;
 }
+
+em {
+  color: blue;
+  font-weight: bold;
+}
+
+a {
+  color: red;
+}

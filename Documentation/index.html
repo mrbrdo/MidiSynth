@@ -36,12 +36,12 @@
     <p>
       For example:
       <ul>
-        <li>The IS_MidiIn Input Source converts MIDI commands into note frequencies and calls TriggerNoteOn/TriggerNoteOff on the NotePlayer Channel Manager.</li>
+        <li>The IS_MidiIn Input Source converts MIDI commands into note frequencies and sends them to the NotePlayer Channel Manager.</li>
         <li>The NotePlayer Channel Manager creates a channel for each frequency being played at the time.</li>
         <li>Each Channel has its seperate Processing Chain containing Chain Members such as CM_Oscillator, CM_ADSR_Envelope etc.</li>
-        <li>After each channel finishes processing, the channels are added together (simple sum operation) via the Channel Adder.</li>
+        <li>After each channel finishes processing its input signal (the frequency), the channel output signals (e.g. oscillations in the time domain) are added together (simple sum operation) via the Channel Adder.</li>
         <li>The resulting single output channel again has its own Processing Chain, usually containing Chain Members such as CM_Normalizator and CM_BufferVisualizer.</li>
-        <li>The normalized buffer in the output channel is played through the speakers via the AudioInOut class, which in turn uses WaveOutDevice to send the buffer to be played to the operating system.</li>
+        <li>The normalized output signal from the output channel is played through the speakers via the AudioInOut class, which in turn uses WaveOutDevice to send the buffer to be played to the operating system.</li>
       </ul>
     </p>
   </div>
@@ -49,67 +49,166 @@
   <h2 class="doc">Input Source</h2>
   <div class="doc">
     <p>
-
+      An input source does not take input from any other component of the system. It is the part of the system that generates input for other components. If you look at the IAudioInputSource interface, you will see that the only method that an input source must implement is <em>float GetOutput()</em>. This method will repetadly be called in real-time and its value will be fed as the input into the main Processing Chain.
+    </p>
+    <h3>IS_ScalePlayer</h3>
+    <p>
+      A simple example is the <em>IS_ScalePlayer</em> input source. This input source creates a seperate thread which will change the note being played every 1 second. Behind the scenes, it uses the NotePlayer channel manager, which is described later in this document. Since this input source only plays one note at a time, the use of a channel manager is not required, but it was used to avoid unnecessary code duplication. When the note is changed, the appropriate channel is created in the channel manager. When the <em>GetOutput</em> method is called, it will return the output signal provided by the channel manager (the channel manager processing chain will usually contain an oscillator which will convert the frequency of the current note (the input into the channel manager) into an actual signal in the time domain).
+    </p>
+    <h3>IS_MidiIn</h3>
+    <p>
+      A slightly more complicated example is the <em>IS_MidiIn</em> input source. Similar to <em>IS_ScalePlayer</em>, this input source also uses the NotePlayer channel manager, however this is actually necessary here, because more than one note can be played at the same time. To capture MIDI input (e.g. from a MIDI keyboard), a free library <a href="http://www.codeproject.com/KB/audio-video/MIDIToolkit.aspx" target="_blank">C# MIDI Toolkit</a> is used. When a key on the keyboard is pressed, it gets translated into a frequency, which is then passed to the channel manager to create a channel playing that frequency. When a key is depressed, the previously created channel is destroyed, again via the channel manager.
     </p>
   </div>
   
   <h2 class="doc">Channel</h2>
   <div class="doc">
     <p>
-
+      The basic path of the signal would be:
+      <ul>
+        <li><b>Input source:</b> generates the signal or input data (e.g. frequency).</li>
+        <li><b>Channel / Input:</b> the signal value from the input source is the input for the channel.</li>
+        <li><b>Channel / Processing chain:</b> applies filters or otherwise modifies the input data (e.g. an oscillator will convert the frequency into an actual signal value at the given time).</li>
+        <li><b>Channel / Output:</b> the signal value after all the filters applied is the output signal value of the channel.</li>
+        <li><b>Output "source":</b> the output samples are sent to the operating system to be played back through the speakers.</li>
+      </ul>
     </p>
-  </div>
-  
-  <h2 class="doc">Channel Manager</h2>
-  <div class="doc">
     <p>
-
+      However, if we are playing multiple notes at the same time, there is a problem with the above path. The problem becomes most apparent when we use an envelope filter (e.g. ADSR envelope). If we are playing two notes at the same time, and at some time one of the note is depressed, the release part of the envelope should kick in, gradually silencing that note. If we only have one channel, we cannot apply this filter on only one note, because our single signal contains both notes combined (this way, we can only decrease the volume of both notes together).
     </p>
-  </div>
-  
-  <h2 class="doc">Processing Chain / Chain Members</h2>
-  <div class="doc">
     <p>
-
+      To get around this problem, the concept of channels is introduced. In the case of playing multiple notes, each note will be on its own channel. Each channel has its own processing chain (collection of filters that are applied), therefore we can apply an ADSR envelope individually on each note. After each subchannel is processed individually, they are all combined by a channel adder (described below) into an output channel. The output channel again has a processing chain with filters that are to be applied on the resulting (combined) signal.
     </p>
   </div>
   
   <h2 class="doc">Channel Adder</h2>
   <div class="doc">
     <p>
+      The channel adder is a very simple component which takes a list of channels, and simply sums their output signal values into a single signal value. Note that because of this sum operation, the signal must be normalized or clipped before being passed to the system.
+    </p>
+  </div>
+  
+  <h2 class="doc">Channel Manager</h2>
+  <div class="doc">
+    <p>
+      The channel manager concept was introduced to simplify playing notes. When a note is "activated", the channel manager will create a new (sub)channel with its frequency as the input. It will set up the same (but individual) processing chain for each of these channels. When a note is "deactivated", its channel will simply be destroyed (please note that this is not actually the case, due to problems with the ADSR envelope - read about this under <em>Special Chain Members - Channel Terminators</em>). For performance reasons, each channel has an <em>active</em> property - instead of creating and destroying channels, we can simply use this property to activate/deactivate a channel - this is solely for performance reasons. To obtain an output signal from the channel manager, the channel adder described above is used to combine the output signals of all its subchannels.
+    </p>
+  </div>
+  
+  <h2 class="doc">Processing Chain / Chain Members</h2>
+  <div class="doc">
+    <p>
+      Each channel has a processing chain, which is a collection of Chain Members (many of chain members can be thought of as filters). If you look at the IAudioChainMember interface, you will see that each channel must implement a <em>void Init(CC_Channel channel)</em> method (this way, a chain member can obtain information about the channel, such as the sample rate), and a <em>float Process(float input)</em> method (which takes an input signal and processes it into an output signal). The abstract class AudioChainMember, which implements IAudioChainMember, contains code to automatically store the channel received by the <em>Init</em> method into a property named <em>c</em>. Most chain members build on AudioChainMember instead of IAudioChainMember, simply to minimize code duplication.
+    </p>
+    <p>
+      A channel has no memory of its own, so chain members that require memory of previous values of the signal (like the convolution filter), must implement such memory by themselves. An example of how to do this can be seen in the CM_Convol chain member - basically one just needs to create a float array and shift it every time a new signal value is received.
+    </p>
+    
+    <h3>CM_Convol</h3>
+    <p>
+      This is a simple <a href="http://en.wikipedia.org/wiki/Convolution" target="_blank">convolution</a> based filter. Besides the channel parameter required by the AudioChainMember abstract class, its constructor also takes a <em>float[] h</em> parameter, the impulse response. The filter generates an output signal based on the input signal, impulse response and memorized previous signal values.
+    </p>
 
+    <h3>CM_Oscillator</h3>
+    <p>
+      The oscillator chain member expects a frequency as the input (as opposed to most other chain members which expect an actual sample as their input). The oscillator will then synthesize a sound of the desired frequency. The oscillator takes a second parameter to its constructor - <em>OscillatorFunctionDelegate oscillatorFunctionDelegate</em>. This parameter is a delegate (i.e. a lambda function) which must match the following skeleton: <em>float OscillatorFunctionDelegate(float frequency, int step, int sampleRate)</em>. This function is the heart of the oscillator and will be used to generate the output signal. An example sine wave oscillator lambda function ( output = sin(2 * PI * freq * (time / sample_rate)) ) is already contained in the class itself:
+      <pre>
+        public static OscillatorFunctionDelegate SineWave = (float freq, int step, int sr) =>
+        {
+            double oi = 2 * Math.PI * freq * step / (double)sr;
+            return (float)(Math.Sin(oi));
+        };
+      </pre>
+    </p>
+    
+    <h3>CM_KarplusStrong</h3>
+    <p>
+      This is an implementation of the <a href="http://en.wikipedia.org/wiki/Karplus-Strong_string_synthesis" target="_blank">Karplus Strong string synthetizator</a>. The expected input into this chain member is (as with CM_Oscillator) not an actual sample but the desired frequency of the string sound to be synthesized.
+    </p>
+    
+    <h3>CM_Normalizator</h3>
+    <p>
+      This is a simple real-time signal normalizator. The output signal being passed to hardware for playback is expected to be in the range [-1.0, 1.0]. If a signal outside this range is encountered, the normalizator will dynamically adapt to this change and normalize this and all further signal values according to this maximum value.
+    </p>
+    <p>
+      As an example, if we keep the signal at value 0.5, it will be translated to 0.5 (0.5 / 1.0) by the normalizator <b>until</b> a signal with the value of (for example) 10.0 is encountered. At this point, 10.0 will be translated to 1.0 (10.0 / 10.0), and if signal values of 0.5 follow, they will become 0.05 (0.5 / 10.0).
+    </p>
+
+    <h3>CM_BufferVisualizer</h3>
+    <p>
+      This chain member is special. The project's GUI code contains a <em>BufferPlot</em> WPF (Windows Presentation Foundation) control. This control has a <em>UpdateBuffer</em> method with a <em>float[] buffer</em> parameter. The control will visualize the contents of this buffer on the screen.
+    </p>
+
+    <p>The CM_BufferVisualizer chain member will memorize a number of previous values of the signal at its input. Every (by default) 0.2 seconds, it will call <em>UpdateBuffer</em> on the <em>BufferPlot</em> control, with the memorized buffer as the parameter. The <em>BufferPlot</em> control will then update the drawing on the screen to represent this buffer. This way, we can observe the signal graphically in real time. Note that the buffer visualizer does not necessarily need to visualize the output signal. It will visualize the data it receives as the input - if you were to put the visualizer before the CM_Oscillator or CM_KarplusStrong, frequency value would be plotted instead of an signal values. Please note that due to a current limitation of the code (only one <em>BufferPlot</em> control is present in the GUI), you should only include the CM_BufferVisualizer chain member in the output channel. Including it in the processing chain of subchannels of a channel manager will lead to unexpected results (since there will usually be more than one of such subchannels).
+    </p>
+  </div>
+  
+  <h2 class="doc">Special Chain Members - Channel Terminators</h2>
+  <div class="doc">
+    <h3>CM_ADSR_Envelope</h3>
+    <p>
+      An <a href="http://en.wikipedia.org/wiki/Synthesizer#ADSR_envelope" target="_blank">ADSR Envelope</a> is a filter that affects the loudness progression of a note being played (<a href="http://en.wikipedia.org/wiki/Synthesizer#ADSR_envelope" target="_blank">read more</a>). The attack, decay and sustain are trivial to implement, but there is a problem when trying to implement release if we are dealing with real-time input, like we are. As explained, the channel manager will create a channel when a note is activated, and the channel should be destroyed when the note is deactivated. However, the release part of the envelope only kicks in after the note has already been deactivated. If the channel was destroyed at this point, the release part of the envelope cannot be realized, because the channel does not exist anymore and the frequency information about the note being played is lost. This is the reason that another property had to be introduced to the channel: <em>InputEnded</em>. Instead of destroying a channel after the note was deactivated, the <em>InputEnded</em> property is set to true. This allows us to realize the release part of the envelope before destroying the channel. After the release part has ended, the channel can be destroyed. However, this introduces another problem - if we are not using the CM_ADSR_Envelope, subchannels in a channel manager will never be destroyed, which is an unacceptable performance issue (and in fact a memory leak). This brings us to the next chain member - CM_ChannelTerminator.
+    </p>
+
+    <h3>CM_ChannelTerminator</h3>
+    <p>
+      As a consequence of the (perhaps poor) design decision on how to handle the release part of the ADSR envelope, a chain member that terminates a channel is required in case the ADSR envelope (which will terminate a channel after the release part of the envelope is finished) is not used. In this case, insert a CM_ChannelTerminator at the end of channel manager subchannels' processing chains, to ensure the channels will be properly destroyed when their input ends. Note, when using CM_ADSR_Envelope, do not use CM_ChannelTerminator and vice versa - they are mutually exclusive. All channel manager's subchannels require a channel terminator (either CM_ADSR_Envelope or CM_ChannelTerminator). The output channel does not require a terminator, because it is never destroyed.
+    </p>
+
+    <p>
+      I personally think the current solution is bad and would require quite a bit of refactoring to eliminate the need for this "hack".
     </p>
   </div>
   
   <h2 class="doc">Audio Output</h2>
   <div class="doc">
     <p>
+      Audio ouput is handled by the AudioInOut class. At the moment, different audio output options are not supported (such as output into a WAVE file, for example). The only option at this point is outputting the signal directly to the sound card, to be played by the speakers. The constructor for AudioInOut takes 3 parameters: an input source, a single (output) channel, and channel information (such as the sample rate).
+    </p>
 
+    <p>
+      The class creates a thread, which contains a continious loop performing the following:
+      <ul>
+        <li>1. Wait for a "hardware" audio buffer to become available for writing.</li>
+        <li>2. Get a sample from the input source.</li>
+        <li>3. Pass the sample into the output channel.</li>
+        <li>4. Get the output (processed) sample from the output channel.</li>
+        <li>5. Write the sample into the audio buffer.</li>
+        <li>6. Repeat steps 2-5 until the audio buffer is full.</li>
+        <li>7. Send the audio buffer to the operating system.</li>
+      </ul>
+    </p>
+
+    <p>
+      There is room for improvement here, the particular problem being that when an audio buffer becomes available, the input source is queried rapidly for many signal values until the buffer is filled. After that, no signal value is queried from the input source until the next buffer becomes available. This means the samples (signal values) are not equally distributed in time. This can become a problem especially when the buffer_size / sample_rate ratio is high. When using a WAVE file as the input, this problem is irrelevant - it is only a problem when dealing with real-time input. For example, when using the IS_MidiIn input source, a buffer_size / sample_rate ratio of under around 50 milliseconds is sufficient to make this problem not noticable, because a human will typically hold a key on the MIDI keyboard for longer than 50ms, and a human will typically not be able to hear the difference between a note lasting e.g. 100ms instead of 125ms.
     </p>
   </div>
   
   <h2 class="doc">Notes about the waveOutHelper C++ subproject</h2>
   <div class="doc">
     <p>
-      The purpose of the waveOutHelper subproject, a DLL written in C++, is to provide real-time audio playback functionality to the .NET application. The support for this functionality is absent or very limited in .NET, hence the need for this subproject. To implement this efficiently, the best choice is to use Win32API, which is tedious to do in .NET managed code, therefore the need for this DLL.
+      The purpose of the waveOutHelper subproject, a DLL written in C++, is to provide real-time audio playback functionality to the .NET application. The support for this functionality is absent or very limited in .NET, hence the need for this subproject. To implement this efficiently, the best choice is to use Win32API, which is tedious to do in .NET managed code, therefore that functionality was extracted into this DLL.
     </p>
 
     <p>
-      WaveOutDevice.cpp creates a class abstracting the low-level multimedia Windows API. Most of the work here is in managing 2 or more audio buffers, which are constantly being exchanged by the operating system (i.e. double-buffering), to achieve seamless real-time audio playback without glitches like crackling sounds. A named semaphore is used to signal the main application that a buffer is ready to be written (.NET already supports semaphores so using a semaphore is an obvious choice).
+      WaveOutDevice.cpp defines a class abstracting the low-level multimedia Windows API. Most of the work here is in managing two (or more) audio buffers, which are constantly being exchanged by the operating system (i.e. double-buffering), to achieve seamless real-time audio playback without glitches like crackling sounds. A named semaphore is used to signal the main application that a buffer is ready to be written (.NET already supports semaphores so using a semaphore is the obvious choice).
     </p>
 
     <p>
-      Because exporting C++ classes from DLLs is not as compatible with all applications as exporting simple functions, waveOutHelper.cpp defines just a few functions which manage the class created in WaveOutDevice.cpp. These "helper" functions are then called by the .NET applications (using .NET PInvoke Interop.) to achieve real-time sound playback. By introducing a "handles" (named deviceId in the code) concept, the DLL is able to create multiple output devices if necessary (just call OpenWaveDevice multiple times to obtain multiple output devices).
+      Because exporting C++ classes from DLLs is not as compatible with all applications as is exporting simple functions, waveOutHelper.cpp defines just a few functions which manage the class created in WaveOutDevice.cpp. These "helper" functions are then called by the .NET applications (using .NET P/Invoke) to achieve real-time sound playback. By introducing a "handles" concept (named deviceId in the code), the DLL is able to create multiple output devices if necessary (just call OpenWaveDevice multiple times to obtain multiple output devices).
     </p>
   </div>
   
   <h2 class="doc">Ideas for Further Work</h2>
   <div class="doc">
     <ul>
-      <li>Adding visual components for chain members and other parts of the project, to allow simple visual construction of audio processing chains, similar to how the program <a href="http://puredata.info/" target="_blank">PureData</a> works. <a href="http://www.propellerheads.se/products/reason/" target="_blank">Propellerheads Reason</a> can also serve as an inspiration here (actually, the structure of the project was inspired by this program).</li>
-      <li>Describing the structure of input sources, channels and chain members via a descriptive language (instead of programatically in a programming language) such as XML or XAML. This would also make it easy to load/save structures created by the "visual editor" mentioned above.</li>
+      <li>Adding visual components for chain members and other components of the project, to allow simple visual construction of audio processing chains, similar to how the program <a href="http://puredata.info/" target="_blank">PureData</a> works. <a href="http://www.propellerheads.se/products/reason/" target="_blank">Propellerheads Reason</a> can also serve as an inspiration here (actually, the structure of the project was inspired by this program).</li>
+      <li>Describing the structure of input sources, channels and chain members via a descriptive language (instead of programatically in a programming language) such as XML, YAML or XAML. This would also make it easy to load/save processing chains created by the "visual editor" proposed above.</li>
       <li>Refactoring the code to make it even more modular, simpler and extensible.</li>
-      <li>Add a WAVE file output option to enable non real-time processing of audio files (e.g. for testing complex, slow filters).</li>
+      <li>Add a WAVE file output option to enable non real-time processing of audio files (e.g. for testing complex, slower filters that cannot run in real-time).</li>
+      <li>Refactor the <em>BufferPlot</em> control and the <em>CM_BufferVisualizer</em> chain member to be able to visualize an arbitrary number of channels at a time.</li>
+      <li>Make the sampling of data from the input source equally distributed in time (see <em>Audio Output</em> notes for more on this problem).</li>
+      <li>Attempt to find a better solution for the problem described in <em>Special Chain Members - Channel Terminators</em>.</li>
     </ul>
   </div>
   
