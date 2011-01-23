@@ -21,6 +21,67 @@
   <p>
     Click a heading to show detailed information.
   </p>
+
+  <h2 class="doc">General Information</h2>
+  <div class="doc">
+    <p>
+      Written in C#.NET (.NET 4.0) using WPF in Visual Studio 2010. Use git (google for msysgit on Windows) to clone this repository. Command line:
+      
+      <pre>
+      git clone git://github.com/mrbrdo/MidiSynth.git
+      </pre>
+      
+      Then open the solution (.sln file) in Visual Studio.
+      </pre>
+    </p>
+
+    <p>
+      For very basic modifications (usage) open the ConfSetup.cs file and modify the Setup method which is responsible for setting up the input source and output channel. Example for a clarinet sound with an ADSR Envelope filter:
+      <pre>
+        public static void SetupClarinetWithEnvelope(out IAudioInputSource inputSource, out CC_Channel outChannel)
+        {
+            // The input source will be a scale player which keeps looping the notes from the C-Major scale
+            inputSource = new IS_ScalePlayer(Info,
+            
+                // Lambda expression for setting up subchannels for each note being played
+                (CC_Channel chan) =>
+                {
+                    // Create a filter chain for the subchannel
+                    List&lt;IAudioChainMember> is_chain = new List&lt;IAudioChainMember&gt;();
+
+                    // Oscillator for clarinet sound (generates signal from frequency information)
+                    is_chain.Add(new CM_Oscillator(chan, (float freq, int step, int sr) =>
+                    {
+                        double oi = 2 * Math.PI * freq * step / (double)sr;
+                        return (float)(Math.Cos(oi) + 0.375 * Math.Cos(3 * oi) +
+                            0.581 * Math.Cos(5 * oi) + 0.382 * Math.Cos(7 * oi) +
+                            0.141 * Math.Cos(9 * oi) + 0.028 * Math.Cos(11 * oi) + 0.009 * Math.Cos(13 * oi));
+                    }));
+                    
+                    is_chain.Add(new CM_ADSR_Envelope(chan, new float[] { 0.3f, 0, 0.3f }, 1, CM_ADSR_Envelope.ADSRLinearFunction));
+
+                    // Assign the created filter chain to the subchannel
+                    chan.SetChain(is_chain);
+                },
+
+                // duration of each note
+                500);
+
+            // Create an output channel
+            outChannel = new CC_Channel(Info);
+
+            // Create a filter chain for the output channel
+            List&lt;IAudioChainMember&gt; chain = new List&lt;IAudioChainMember&gt;();
+            chain.Add(new CM_Normalizator(outChannel)); // normalizator
+            chain.Add(new CM_BufferVisualizer(outChannel, 800)); // visualizer (plots the signal in real time to the screen)
+
+            // Set the filter chain to the output channel and activate it (output channel should always be active)
+            outChannel.SetChain(chain);
+            outChannel.Activate();
+        }
+        </pre>
+    </p>
+  </div>
   
   <h2 class="doc">Project Structure</h2>
   <div class="doc">
